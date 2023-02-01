@@ -9,6 +9,7 @@ types:
     description: GET all customer's accounts
     headers:
       userId:
+      type: integer
     queryParameters:
       type:
         displayName: Account Type
@@ -39,6 +40,7 @@ types:
     description: POST new customer accounts
     headers:
       userId:
+      type: integer
     body:
       application/json:
         example: !include examples/accountExamplePOST.raml
