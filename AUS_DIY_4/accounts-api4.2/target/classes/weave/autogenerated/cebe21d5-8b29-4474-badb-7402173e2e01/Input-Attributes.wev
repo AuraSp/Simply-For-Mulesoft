@@ -1,0 +1,23 @@
+%dw 2.0
+
+type auto_cebe21d5_8b29_4474_badb_7402173e2e01_Input_Attributes = {|
+  clientCertificate?: {|
+    publicKey?: {|  |}, 
+    "type"?: String, 
+    encoded?: Binary
+  |}, 
+  headers: {| userID: Number |}, 
+  listenerPath: String, 
+  method: String, 
+  queryParams: {|  |}, 
+  queryString: String, 
+  relativePath: String, 
+  remoteAddress: String, 
+  requestPath: String, 
+  requestUri: String, 
+  scheme: String, 
+  uriParams: {| account_ID: String |}, 
+  version: String, 
+  localAddress: String
+|}
+
