@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_cebe21d5_8b29_4474_badb_7402173e2e01_Output_Payload = Array<{  accountID?: Number,   createdAt?: String,   address: String,   airMiles: Number,   name: String,   "type": "business" | "personal",   _?: Any}>
-
