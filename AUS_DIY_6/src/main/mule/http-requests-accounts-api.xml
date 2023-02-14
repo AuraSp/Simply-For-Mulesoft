@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f001e0c5-02d7-41c7-add8-4eddec482bef" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="76c3f134-b0f6-4227-965d-ef190cb5bd33">
+		<http:request-connection host="account-api-spejeraite.us-e2.cloudhub.io"/>
+	</http:request-config>
+	<flow name="http-requests-accounts-apiFlow" doc:id="56228925-aaa4-4c83-b2b0-530f6d3ea32a" >
+		<http:listener doc:name="Listener" doc:id="19d573a9-5007-41f9-9075-c47dc9047cc5" config-ref="HTTP_Listener_config" path="/accounts-by" allowedMethods="GET" >
+			<http:response reasonPhrase="Success">
+				<http:headers ><![CDATA[#[{
+	front_user_id: vars.userID,
+	account_name: vars.accountName,
+	account_type: vars.accountType,
+	account_count: sizeOf(payload as Array)
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="e439a3af-a0dc-4de2-8f8a-05c820a6fdda" />
+		<set-variable value="#[attributes.headers.front_user_id]" doc:name="User ID" doc:id="ca4902a4-ea5e-4adc-92cb-5e691bcce0f8" variableName="userID"/>
+		<set-variable value='#[attributes.queryParams.account_type default "business"]' doc:name="Account Type" doc:id="ebe00a37-e7e1-4840-8c64-9fe5c7e28ac7" variableName="accountType"/>
+		<set-variable value="#[attributes.queryParams.account_name]" doc:name="Account Name" doc:id="743c4cdc-9278-491d-bc15-f75fc91b14de" variableName="accountName" />
+		<choice doc:name="Choice" doc:id="424eca7a-793a-46f8-ac86-6e3bc716182f" >
+			<when expression="#[vars.accountName !=null and !isEmpty(vars.accountName)]">
+				<http:request method="GET" doc:name="Request By Name" doc:id="01910c95-035e-4419-b372-eee69076559a" config-ref="HTTP_Request_configuration" path="/accounts" >
+					<http:headers ><![CDATA[#[{
+	"client_secret" : "d434137DfD4c49529590486344B8CaDb",
+	"client_id" : "883ed6d76f8248689a3cc5bf1e22f5b7",
+	"userID": vars.userID
+}]]]></http:headers>
+					<http:query-params ><![CDATA[#[{
+	account_name: vars.accountName
+}]]]></http:query-params>
+				</http:request>
+				<logger level="INFO" doc:name="Logger" doc:id="99286398-29f2-4871-91ee-f6ed2f01a5dd" />
+			</when>
+			<when expression="#[!isEmpty(vars.accountType)]">
+				<http:request method="GET" doc:name="Request By Type" doc:id="e55cc951-dee7-4021-859d-6f2dccc81aab" config-ref="HTTP_Request_configuration" path="/accounts">
+					<http:headers><![CDATA[#[{
+	"client_secret" : "d434137DfD4c49529590486344B8CaDb",
+	"client_id" : "883ed6d76f8248689a3cc5bf1e22f5b7",
+	"userID": vars.userID
+}]]]></http:headers>
+					<http:query-params><![CDATA[#[{
+	account_type: vars.accountType
+}]]]></http:query-params>
+				</http:request>
+				<logger level="INFO" doc:name="Logger" doc:id="216f7802-ec6e-4576-a4a6-e9a4a6caef74" />
+			</when>
+			<otherwise>
+				<http:request method="GET" doc:name="Request All" doc:id="2c075392-ccc0-4a3b-bbdd-9bba0de12d4b" config-ref="HTTP_Request_configuration" path="/accounts">
+			<http:headers><![CDATA[#[{
+	"client_secret" : "d434137DfD4c49529590486344B8CaDb",
+	"client_id" : "883ed6d76f8248689a3cc5bf1e22f5b7",
+	"userID": vars.userID
+}]]]></http:headers>
+		</http:request>
+				<logger level="INFO" doc:name="Logger" doc:id="991d1581-b752-4ffc-97e1-31d898dc1de2" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
