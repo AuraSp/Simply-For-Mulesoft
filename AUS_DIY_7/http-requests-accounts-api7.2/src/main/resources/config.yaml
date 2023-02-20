@@ -1,0 +1,4 @@
+http:
+  port: "8081"
+  host: "account-api-spejeraite.us-e2.cloudhub.io"
+  basePath: "/accounts"

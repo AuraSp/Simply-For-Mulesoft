@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="67b3e159-a92c-470c-b3a8-2aa2938e483e" >
+		<http:listener-connection host="localhost" port="${http.port}" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="885b3f8f-4353-4324-8a97-ecc0e6a34855" >
+		<http:request-connection host="${http.host}" />
+	</http:request-config>
+	<vm:config name="POST_VM_Config" doc:name="VM Config" doc:id="142d914d-e090-4e2d-9121-e5450cf4a853" >
+		<vm:queues >
+			<vm:queue queueName="post_body" />
+		</vm:queues>
+	</vm:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="2ab310e9-3983-478c-be26-0e535c6bac96" file="config.yaml" />
+	</mule>
