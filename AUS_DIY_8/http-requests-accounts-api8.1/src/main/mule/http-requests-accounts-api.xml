@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:accounts-api="http://www.mulesoft.org/schema/mule/accounts-api" xmlns:account-api="http://www.mulesoft.org/schema/mule/account-api"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/account-api http://www.mulesoft.org/schema/mule/account-api/current/mule-account-api.xsd
+http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/mule/accounts-api/current/mule-accounts-api.xsd">
+	<sub-flow name="Exit-logger" doc:id="22efdf8f-fd06-4d14-ac1d-6019662f32c6" >
+		<logger level="INFO" doc:name="Logger" doc:id="fcca2b27-8717-4c73-81af-7f6a3897822e" />
+	</sub-flow>
+	<flow name="GETaccountsByID" doc:id="7558eccf-18f2-405c-913f-1c54417628e5">
+		<http:listener doc:name="Listener" doc:id="4c78a4e4-a67a-4689-bc7b-177efd5ce0ef" config-ref="HTTP_Listener_config" path="/accounts-by/{accountID}" allowedMethods="GET">
+			<http:response reasonPhrase="Success">
+				<http:headers><![CDATA[#[{
+	account_count: sizeOf(payload)
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<flow-ref doc:name="Variables subFlow" doc:id="4f4d678e-09eb-457e-9549-54e19355d795" name="subFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f2df14d3-d311-443f-a794-d996af9d3fc9" />
+		<account-api:get-account-by-account-id doc:name="Get account by account id" doc:id="323515d9-6dc4-4101-afa5-a806167ef1a4" config-ref="Account_API_Configs" account-id="#[attributes.uriParams.accountID]" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}"/>
+		<flow-ref doc:name="Last Logger" doc:id="b8d55d0f-e99e-4df4-8696-98f1a89fbbed" name="Exit-logger"/>
+	</flow>
+	<flow name="GETaccountsBy" doc:id="56228925-aaa4-4c83-b2b0-530f6d3ea32a" >
+		<http:listener doc:name="Listener" doc:id="19d573a9-5007-41f9-9075-c47dc9047cc5" path="/accounts-by" allowedMethods="GET" config-ref="HTTP_Listener_config">
+			<http:response reasonPhrase="Success">
+				<http:headers ><![CDATA[#[{
+	front_user_id: vars.userID,
+	account_name: vars.accountName,
+	account_type: vars.accountType,
+	account_count: sizeOf(payload as Array)
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="e439a3af-a0dc-4de2-8f8a-05c820a6fdda" />
+		<flow-ref doc:name="Variables subFlow" doc:id="00acb63c-309b-420d-ba5b-0cec09b2dae2" name="subFlow"/>
+		<choice doc:name="Choice" doc:id="424eca7a-793a-46f8-ac86-6e3bc716182f" >
+			<when expression="#[vars.accountName !=null and !isEmpty(vars.accountName)]">
+				<account-api:get-accounts doc:name="Get accounts" doc:id="8c4b4f48-5de6-432b-88cc-bbef068bbde7" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-name="#[vars.accountName]" account-type="personal"/>
+				<flow-ref doc:name="Last Logger" doc:id="575b6988-9dcb-4384-87ea-5a4c2ba9873a" name="Exit-logger"/>
+			</when>
+			<when expression="#[!isEmpty(vars.accountType)]">
+				<account-api:get-accounts doc:name="Get accounts" doc:id="85286883-db33-456d-a832-eb6dc605b946" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-type='#[vars.accountType default "business"]'/>
+				<flow-ref doc:name="Last Logger" doc:id="0be393a3-8f88-4614-8153-93ae75f3ff97" name="Exit-logger"/>
+			</when>
+			<otherwise>
+				<account-api:get-accounts doc:name="Get accounts" doc:id="f950d629-cdf7-4607-a733-ae03812712f6" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-type="personal"/>
+				<flow-ref doc:name="Last Logger" doc:id="3511b950-f1fe-49dc-b220-ea42405d9f73" name="Exit-logger"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<sub-flow name="subFlow" doc:id="9ce76399-7764-4a12-b4d6-bd3c2ee3fffa">
+		<set-variable value="#[attributes.headers.front_user_id]" doc:name="User ID" doc:id="ca4902a4-ea5e-4adc-92cb-5e691bcce0f8" variableName="userID" />
+		<set-variable value='#[attributes.queryParams.account_type default "business"]' doc:name="Account Type" doc:id="ebe00a37-e7e1-4840-8c64-9fe5c7e28ac7" variableName="accountType" />
+		<set-variable value="#[attributes.queryParams.account_name]" doc:name="Account Name" doc:id="743c4cdc-9278-491d-bc15-f75fc91b14de" variableName="accountName" />
+	</sub-flow>
+	<flow name="POSTaccounts" doc:id="c66a0c02-a712-4035-988f-5b171e03d94c" >
+		<http:listener doc:name="Listener" doc:id="c04f9bd3-6275-4841-beee-0fcf5731451e" config-ref="HTTP_Listener_config" path="/accounts" allowedMethods="POST">
+			<non-repeatable-stream />
+			<http:response >
+				<http:headers ><![CDATA[#[{
+	"front_user_id": vars.userID,
+	"accounts_number": sizeOf(payload)
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="361e5738-f9e7-41cb-8153-3e3e24e2b91a" />
+		<flow-ref doc:name="Variables subFlow" doc:id="b9bba5b0-95af-43f7-ac43-c2b5697f5ae4" name="subFlow" />
+		<vm:publish doc:name="Publish" doc:id="f74a9a25-2e63-4b53-960e-1c891e7404cd" config-ref="POST_VM_Config" queueName="post_body">
+			<vm:content ><![CDATA[#[output application/json
+---
+{
+	user_ID: vars.userID,
+	accounts: payload
+}]]]></vm:content>
+		</vm:publish>
+		<ee:transform doc:name="Transform Message" doc:id="8889c2f9-f2dc-42c6-b6e9-fa0998ad9624" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Accounts Submitted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Last Logger" doc:id="e9f9e72d-3cfa-4e68-8a2e-453bb04a9a5b" name="Exit-logger"/>
+	</flow>
+	<flow name="PassNewAccountsValues" doc:id="f2f2a73c-fb1b-4986-bdeb-df2c06fab65c" >
+		<vm:listener doc:name="Listener" doc:id="11f8f29b-e095-402a-bb6b-3f6880c60a3b" config-ref="POST_VM_Config" queueName="post_body"/>
+		<logger level="INFO" doc:name="Logger" doc:id="27cecc17-1c7c-42e3-b9c0-445e8b34eae0" />
+		<account-api:create-account doc:name="Create account" doc:id="47b62c9c-06cf-4f8a-a58a-d52c3a392c48" config-ref="Account_API_Configs" user-id="#[vars.front_user_id]" client-id="${client.id}" client-secret="${client.secret}"/>
+		<flow-ref doc:name="Last Logger" doc:id="7cc82777-ba33-4375-9892-b91939a89049" name="Exit-logger"/>
+	</flow>
+</mule>
