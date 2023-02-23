@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:accounts-api="http://www.mulesoft.org/schema/mule/accounts-api" xmlns:account-api="http://www.mulesoft.org/schema/mule/account-api"
-	xmlns:os="http://www.mulesoft.org/schema/mule/os"
-	xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:accounts-api="http://www.mulesoft.org/schema/mule/accounts-api"
+	xmlns:account-api="http://www.mulesoft.org/schema/mule/account-api"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/account-api http://www.mulesoft.org/schema/mule/account-api/current/mule-account-api.xsd
-http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/mule/accounts-api/current/mule-accounts-api.xsd">
+http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/mule/accounts-api/current/mule-accounts-api.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<sub-flow name="Exit-logger" doc:id="22efdf8f-fd06-4d14-ac1d-6019662f32c6" >
 		<logger level="INFO" doc:name="Logger" doc:id="fcca2b27-8717-4c73-81af-7f6a3897822e" />
 	</sub-flow>
 	<flow name="GETaccountsByID" doc:id="7558eccf-18f2-405c-913f-1c54417628e5">
-		<http:listener doc:name="Listener" doc:id="4c78a4e4-a67a-4689-bc7b-177efd5ce0ef" config-ref="HTTP_Listener_config" path="/accounts-by/{accountID}" allowedMethods="GET">
+		<http:listener doc:name="Listener" doc:id="4c78a4e4-a67a-4689-bc7b-177efd5ce0ef" config-ref="HTTP_Listener_config" path="/{accountID}" allowedMethods="GET">
 			<http:response reasonPhrase="Success">
 				<http:headers><![CDATA[#[{
 	account_count: sizeOf(payload)
@@ -30,8 +31,6 @@ http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/
 			<http:response reasonPhrase="Success">
 				<http:headers ><![CDATA[#[{
 	front_user_id: vars.userID,
-	account_name: vars.accountName,
-	account_type: vars.accountType,
 	account_count: sizeOf(payload as Array)
 }]]]></http:headers>
 			</http:response>
@@ -40,15 +39,15 @@ http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/
 		<flow-ref doc:name="Variables subFlow" doc:id="00acb63c-309b-420d-ba5b-0cec09b2dae2" name="subFlow"/>
 		<choice doc:name="Choice" doc:id="424eca7a-793a-46f8-ac86-6e3bc716182f" >
 			<when expression="#[vars.accountName !=null and !isEmpty(vars.accountName)]">
-				<account-api:get-accounts doc:name="Get accounts" doc:id="8c4b4f48-5de6-432b-88cc-bbef068bbde7" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-name="#[vars.accountName]" account-type="personal"/>
+				<account-api:get-accounts doc:name="Get accounts" doc:id="8c4b4f48-5de6-432b-88cc-bbef068bbde7" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-name='#["Mat Siva"]'/>
 				<flow-ref doc:name="Last Logger" doc:id="575b6988-9dcb-4384-87ea-5a4c2ba9873a" name="Exit-logger"/>
 			</when>
 			<when expression="#[!isEmpty(vars.accountType)]">
-				<account-api:get-accounts doc:name="Get accounts" doc:id="85286883-db33-456d-a832-eb6dc605b946" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-type='#[vars.accountType default "business"]'/>
+				<account-api:get-accounts doc:name="Get accounts" doc:id="85286883-db33-456d-a832-eb6dc605b946" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-type='#[vars.accountType]'/>
 				<flow-ref doc:name="Last Logger" doc:id="0be393a3-8f88-4614-8153-93ae75f3ff97" name="Exit-logger"/>
 			</when>
 			<otherwise>
-				<account-api:get-accounts doc:name="Get accounts" doc:id="f950d629-cdf7-4607-a733-ae03812712f6" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}" account-type="personal"/>
+				<account-api:get-accounts doc:name="Get accounts" doc:id="f950d629-cdf7-4607-a733-ae03812712f6" config-ref="Account_API_Configs" user-id="#[vars.userID]" client-id="${client.id}" client-secret="${client.secret}"/>
 				<flow-ref doc:name="Last Logger" doc:id="3511b950-f1fe-49dc-b220-ea42405d9f73" name="Exit-logger"/>
 			</otherwise>
 		</choice>
@@ -56,7 +55,7 @@ http://www.mulesoft.org/schema/mule/accounts-api http://www.mulesoft.org/schema/
 	<sub-flow name="subFlow" doc:id="9ce76399-7764-4a12-b4d6-bd3c2ee3fffa">
 		<set-variable value="#[attributes.headers.front_user_id]" doc:name="User ID" doc:id="ca4902a4-ea5e-4adc-92cb-5e691bcce0f8" variableName="userID" />
 		<set-variable value='#[attributes.queryParams.account_type default "business"]' doc:name="Account Type" doc:id="ebe00a37-e7e1-4840-8c64-9fe5c7e28ac7" variableName="accountType" />
-		<set-variable value="#[attributes.queryParams.account_name]" doc:name="Account Name" doc:id="743c4cdc-9278-491d-bc15-f75fc91b14de" variableName="accountName" />
+		<set-variable value="#[attributes.queryParams.name]" doc:name="Account Name" doc:id="743c4cdc-9278-491d-bc15-f75fc91b14de" variableName="accountName" />
 	</sub-flow>
 	<flow name="POSTaccounts" doc:id="c66a0c02-a712-4035-988f-5b171e03d94c" >
 		<http:listener doc:name="Listener" doc:id="c04f9bd3-6275-4841-beee-0fcf5731451e" config-ref="HTTP_Listener_config" path="/accounts" allowedMethods="POST">

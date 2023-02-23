@@ -8,5 +8,5 @@ client:
     
     
 account:
-  host: "account-api-spejeraite.us-e2.cloudhub.io"
+  host: "accounts-api-spejeraite.us-e2.cloudhub.io"
   basepath: "/accounts"
