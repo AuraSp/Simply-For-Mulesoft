@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:account-api="http://www.mulesoft.org/schema/mule/account-api"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/account-api http://www.mulesoft.org/schema/mule/account-api/current/mule-account-api.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	
+	<http:listener-config name="HTTP_Listener_Config" doc:name="HTTP Listener config" doc:id="67b3e159-a92c-470c-b3a8-2aa2938e483e" >
+		<http:listener-connection host="localhost" port="${http.port}" />
+	</http:listener-config>
+	<vm:config name="POST_VM_Config" doc:name="VM Config" doc:id="142d914d-e090-4e2d-9121-e5450cf4a853" >
+		<vm:queues >
+			<vm:queue queueName="post_body" />
+		</vm:queues>
+	</vm:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="2ab310e9-3983-478c-be26-0e535c6bac96" file="config.yaml" />
+	<account-api:config name="Account_API_Config" doc:name="Account API Config" doc:id="baa39995-565a-4aa9-b29f-20e763e1c435" property_host="${account.host}" property_protocol="${http.protocol}" property_port="80"/>
+	<wsc:config name="Web_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="97317162-71fc-4901-8a5d-8811009d9518" >
+		<wsc:connection wsdlLocation="${transactions.wsdl}" service="${transactions.service}" port="${transactions.port}" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	</mule>
