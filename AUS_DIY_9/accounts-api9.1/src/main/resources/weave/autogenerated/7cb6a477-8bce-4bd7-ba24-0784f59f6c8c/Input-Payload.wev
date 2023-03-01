@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_7cb6a477_8bce_4bd7_ba24_0784f59f6c8c_Input_Payload = Array<{  accountID?: Number,   createdAt?: String,   address: String,   airMiles: Number,   accountName: String,   accountType: "business" | "personal",   _?: Any}>
+
