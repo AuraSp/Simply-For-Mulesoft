@@ -1,0 +1,18 @@
+[
+  {
+    "accountID": 1,
+    "accountName": "User",
+    "accountType": "personal",
+    "address": "12345 Green Street, USA",
+    "airMiles": 2000,
+    "createdAt": "2023-01-26T03:36:00Z"
+  },
+  {
+    "accountID": 2,
+    "accountName": "Another User",
+    "accountType": "business",
+    "address": "12345 Green Street, USA",
+    "airMiles": 200,
+    "createdAt": "2023-01-26T03:36:00Z"
+  }
+]

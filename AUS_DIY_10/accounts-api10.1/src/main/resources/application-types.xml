@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="acounts-json" format="json">
+      <types:shape format="weave" example="json/account-json-example.json"><![CDATA[%dw 2.0
+
+type acounts_json = Array<{|  accountID: Number {"typeId": "int"},   accountName: String,   accountType: String,   address: String,   airMiles: Number {"typeId": "int"},   createdAt: String|}> {"example": "[{\\\"accountID\\\":1,\\\"accountName\\\":\\\"User\\\",\\\"accountType\\\":\\\"personal\\\",\\\"address\\\":\\\"12345 Green Street, USA\\\",\\\"airMiles\\\":2000,\\\"createdAt\\\":\\\"2023-01-26T03:36:00Z\\\"},{\\\"accountID\\\":2,\\\"accountName\\\":\\\"Another User\\\",\\\"accountType\\\":\\\"business\\\",\\\"address\\\":\\\"12345 Green Street, USA\\\",\\\"airMiles\\\":200,\\\"createdAt\\\":\\\"2023-01-26T03:36:00Z\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="attributes" format="java">
+      <types:shape format="java" element="org.mule.extension.http.api.HttpRequestAttributes"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#abc8bc81-e013-47c3-a9a8-8dba6874172f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="acounts-json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#16b3b060-4d76-4525-9057-3968d8d5814e">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="acounts-json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#74835da3-64c7-4f50-9bf7-cbe8e8a61307">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="acounts-json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#64eac30b-9ef6-44ee-bfc0-a526eab7ef78">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:attributes type="attributes"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
