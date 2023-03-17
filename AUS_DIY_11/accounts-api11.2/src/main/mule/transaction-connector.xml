@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	<sub-flow name="subUserID" doc:id="a0029e26-d413-4d29-9fdf-f924c57d1a49" >
+		<set-variable value="#[attributes.headers.front_user_id]" doc:name="Set User ID" doc:id="ca9ad281-30fa-4e52-b910-f2202730a844" variableName="userID" />
+	</sub-flow>
+	<flow name="Transactions-by-account-ID" doc:id="12423cee-aa3f-4d7d-8469-942f0ebf2eb3" >
+		<http:listener doc:name="Listener" doc:id="ed275df2-6f3e-429c-805e-f101ff6fb4a7" config-ref="HTTP_Listener_Config" path="/transactions/{accountID}" allowedMethods="GET">
+			<http:response >
+				<http:headers ><![CDATA[#[{
+	number_of_transactions: sizeOf(payload..*transactions default 0),
+	accountID: vars.accountID,
+	front_user_id: vars.userID
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<flow-ref doc:name="subFlow" doc:id="8f4911f9-2c9b-4c0d-8167-72cb5d4d5e03" name="subUserID"/>
+		<set-variable value="#[attributes.uriParams.accountID]" doc:name="Set Account ID" doc:id="bcc384b7-8327-45f4-882d-429b87aaeb48" variableName="accountID" />
+		<ee:transform doc:name="Pass account ID" doc:id="6fcc6db0-57c1-4d6f-a882-c7472a263124" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://training.mulesoft.com/
+---
+{
+	ns0#GetTransactionsforCustomers:  {
+		customerID: vars.accountID as String
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="GetTransactionsforCustomers" doc:name="Consume" doc:id="19fcf4e5-acb8-41ae-b76d-01badb3cc3da" config-ref="Web_Consumer_Config" />
+		<ee:transform doc:name="[SOAP payload]" doc:id="b146c962-1689-4be3-a0b8-233d894891f4" >
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var sumAmount = payload..*amount
+
+---
+{
+
+	total_amount: sum(sumAmount) as String {format: "###.0"},
+	transactions: (
+		payload..*transaction
+	)
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

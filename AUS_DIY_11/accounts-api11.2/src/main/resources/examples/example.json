@@ -1,0 +1,34 @@
+[
+  {
+    "accountID": 1,
+    "accountName": "User",
+    "accountType": "personal",
+    "address": "12345 Green Street, USA",
+    "airMiles": 2000,
+    "createdAt": "2023-01-26T03:36:00Z"
+  },
+  {
+    "accountID": 2,
+    "accountName": "Another User",
+    "accountType": "business",
+    "address": "12345 Green Street, USA",
+    "airMiles": 200,
+    "createdAt": "2021-07-26T03:36:00Z"
+  },
+    {
+    "accountID": 3,
+    "accountName": "Third User",
+    "accountType": "business",
+    "address": "12345 Green Street, USA",
+    "airMiles": 3485,
+    "createdAt": "2022-04-26T03:36:00Z"
+  },
+      {
+    "accountID": 4,
+    "accountName": "User",
+    "accountType": "business",
+    "address": "12345 Green Street, USA",
+    "airMiles": 9000,
+    "createdAt": "2023-01-26T03:36:00Z"
+  }
+]

@@ -1,0 +1,21 @@
+# Global
+http:
+  protocol: "HTTP"
+  port: "8081"
+
+# Client Access
+client:
+  id: "efb7403267ae44f8865e31896adc0076"
+  secret: "51361524CF544385964F7472Cfe566d0"
+
+# Account Config
+account:
+  host: "accounts-api-spejeraite.us-e2.cloudhub.io"
+  basepath: "/accounts"
+
+# Transaction Config
+transactions:
+  wsdl: "http://apdev-accounts-ws.cloudhub.io/api/transactions?wsdl"
+  service: "TransactionServiceService"
+  port: "TransactionServicePort"
+  address: "http://apdev-accounts-ws.cloudhub.io/api/transactions"
