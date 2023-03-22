@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mule xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+xmlns="http://www.mulesoft.org/schema/mule/core"
+ xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" 
+ xmlns:batch="http://www.mulesoft.org/schema/mule/ee/batch" 
+ xmlns:bti="http://www.mulesoft.org/schema/mule/ee/bti" 
+ xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+ xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+ xmlns:http-policy="http://www.mulesoft.org/schema/mule/mule-http" 
+ xmlns:kryo="http://www.mulesoft.org/schema/mule/kryo" 
+ xmlns:module="http://www.mulesoft.org/schema/mule/module" 
+ xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" 
+ xmlns:tls="http://www.mulesoft.org/schema/mule/tls" 
+ xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
+xmlns:ss="http://www.springframework.org/schema/security"
+ xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/spring-security 
+http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd
+http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core 
+ http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+ http://www.mulesoft.org/schema/mule/http 
+ http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+ http://www.mulesoft.org/schema/mule/apikit-soap 
+ http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd 
+ http://www.mulesoft.org/schema/mule/ee/core 
+ http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    
+    <http:listener-config name="api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081"/>
+    </http:listener-config>
+    <apikit-soap:config httpStatusVarName="httpStatus" name="soapkit-config" port="KarnelServicePort" service="KarnelService" wsdlLocation="karnel_shelves.wsdl"/>
+   
+
+  <flow name="SpringExample">
+    <http:listener config-ref="api-httpListenerConfig" path="/" doc:name="HTTP"/>
+  <http:basic-security-filter
+      realm="mule" />
+  </flow>
+    
+	<flow name="api-main">
+        <http:listener config-ref="api-httpListenerConfig" path="/KarnelService/KarnelServicePort">
+            <http:response statusCode="#[attributes.additionalTransportData.statusCode default 200]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[attributes.additionalTransportData.statusCode default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit-soap:router config-ref="soapkit-config">
+            <apikit-soap:message>#[payload]</apikit-soap:message>
+            <apikit-soap:attributes>#[
+              %dw 2.0
+              output application/java
+              ---
+              {
+                  headers: attributes.headers,
+                  method: attributes.method,
+                  queryString: attributes.queryString
+            }]</apikit-soap:attributes>
+        </apikit-soap:router>
+		<error-handler ref="api-main-error-handler" />
+    </flow>
+    <flow name="ListShelves:\soapkit-config">
+        <flow-ref doc:name="Flow Reference" doc:id="f4699050-a8be-4f09-82e4-2a782ce3ec66" name="GetShelves"/>
+    </flow>
+</mule>
