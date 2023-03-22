@@ -1,51 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<mule xmlns:mule-ss="http://www.mulesoft.org/schema/mule/spring-security"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
-xmlns="http://www.mulesoft.org/schema/mule/core"
- xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" 
- xmlns:batch="http://www.mulesoft.org/schema/mule/ee/batch" 
- xmlns:bti="http://www.mulesoft.org/schema/mule/ee/bti" 
- xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
- xmlns:http="http://www.mulesoft.org/schema/mule/http" 
- xmlns:http-policy="http://www.mulesoft.org/schema/mule/mule-http" 
- xmlns:kryo="http://www.mulesoft.org/schema/mule/kryo" 
- xmlns:module="http://www.mulesoft.org/schema/mule/module" 
- xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" 
- xmlns:tls="http://www.mulesoft.org/schema/mule/tls" 
- xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
-xmlns:ss="http://www.springframework.org/schema/security"
- xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/spring-security http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd 
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
-http://www.mulesoft.org/schema/mule/spring-security 
-http://www.mulesoft.org/schema/mule/spring-security/current/mule-spring-security.xsd
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
+xmlns:spring="http://www.mulesoft.org/schema/mule/spring" 
+xmlns="http://www.mulesoft.org/schema/mule/core" 
+xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap" 
+xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" 
+xmlns:http="http://www.mulesoft.org/schema/mule/http" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:db="http://www.mulesoft.org/schema/mule/db"
+xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core 
+http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+http://www.mulesoft.org/schema/mule/http 
+http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/apikit-soap 
+http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd 
+http://www.mulesoft.org/schema/mule/ee/core 
+http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+    http://www.mulesoft.org/schema/mule/db
+    http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core 
- http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
- http://www.mulesoft.org/schema/mule/http 
- http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
- http://www.mulesoft.org/schema/mule/apikit-soap 
- http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd 
- http://www.mulesoft.org/schema/mule/ee/core 
- http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-    
+http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/spring
+http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd">
+
     <http:listener-config name="api-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081"/>
     </http:listener-config>
-    <apikit-soap:config httpStatusVarName="httpStatus" name="soapkit-config" port="KarnelServicePort" service="KarnelService" wsdlLocation="karnel_shelves.wsdl"/>
-   
-
-  <flow name="SpringExample">
-    <http:listener config-ref="api-httpListenerConfig" path="/" doc:name="HTTP"/>
-  <http:basic-security-filter
-      realm="mule" />
-  </flow>
-    
+    <apikit-soap:config httpStatusVarName="httpStatus" name="soapkit-config" port="KARNEL_MGMT_SYSSOAP" service="KARNEL_MGMT_SYS" wsdlLocation="KARNEL_MGMT_SYS.wsdl"/>
+	
+	 <spring:config name="Spring_Config" doc:name="Spring Config" doc:id="75c335d1-694d-4d44-aad3-b7302ac38d8e" files="beans.xml" />
+	 
+	<spring:security-manager doc:name="Spring Security manager" doc:id="624962b4-9f50-4a0b-84c2-496a8cc018d0" >
+		<spring:delegate-security-providers >
+			<spring:delegate-security-provider name="memory-provider" delegate-ref="authenticationManager" />
+		</spring:delegate-security-providers>
+	</spring:security-manager>
+	
 	<flow name="api-main">
-        <http:listener config-ref="api-httpListenerConfig" path="/KarnelService/KarnelServicePort">
+        <http:listener config-ref="api-httpListenerConfig" path="/KARNEL_MGMT_SYS/KARNEL_MGMT_SYSSOAP">
             <http:response statusCode="#[attributes.additionalTransportData.statusCode default 200]">
                 <http:body>#[payload]</http:body>
                 <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
@@ -55,7 +46,9 @@ http://www.mulesoft.org/schema/mule/core
                 <http:headers>#[attributes.protocolHeaders default {}]</http:headers>
             </http:error-response>
         </http:listener>
-        <apikit-soap:router config-ref="soapkit-config">
+        <http:basic-security-filter doc:name="Basic security filter" doc:id="0f5f4b9d-250f-46ba-9102-1e0b288f01ca" realm="mule"/>
+		<spring:authorization-filter doc:name="Authorization filter" doc:id="58fe89ff-3083-4c15-80d8-8d6b873e75a1" requiredAuthorities="USER"/>
+		<apikit-soap:router config-ref="soapkit-config">
             <apikit-soap:message>#[payload]</apikit-soap:message>
             <apikit-soap:attributes>#[
               %dw 2.0
@@ -67,9 +60,23 @@ http://www.mulesoft.org/schema/mule/core
                   queryString: attributes.queryString
             }]</apikit-soap:attributes>
         </apikit-soap:router>
-		<error-handler ref="api-main-error-handler" />
     </flow>
     <flow name="ListShelves:\soapkit-config">
-        <flow-ref doc:name="Flow Reference" doc:id="f4699050-a8be-4f09-82e4-2a782ce3ec66" name="GetShelves"/>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns ns0 http://karnel-sg.com/WS_M3_TO_CRM/KARNEL_MGMT_SYS
+---
+{
+	body: {
+		ns0#ListShelvesResponse: {
+			SHELF_ID: payload.body.ns0#ListShelves.SHELF_ID
+		}
+	} write "application/xml"
+}]]>
+                </ee:set-payload>
+            </ee:message>
+        </ee:transform>
     </flow>
 </mule>
