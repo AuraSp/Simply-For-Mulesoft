@@ -4,108 +4,38 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<error-handler name="api-main-error-handler" doc:id="6eda5fe9-2a71-43e5-a1eb-1cae69a3a3cc" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="dc549a92-ede1-4a26-a762-15d426197c4f" type="APIKIT:BAD_REQUEST" >
-			<ee:transform doc:name="Transform Message" doc:id="41865480-4741-4971-843e-9a882d667306" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Bad request"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[400]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="83377fd0-531a-4fbd-98c5-024c7af1f545" type="APIKIT:NOT_FOUND" >
-			<ee:transform doc:name="Transform Message" doc:id="6b063f7d-a4e8-4f84-b26b-108fe66cfd3d" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Resource not found"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[404]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="89cf6254-ed92-484e-889a-bb4234354d30" type="APIKIT:METHOD_NOT_ALLOWED" >
-			<ee:transform doc:name="Transform Message" doc:id="cb48dbc8-0710-41ff-a5f8-5cf59e955a64" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Method not allowed"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1f9ee019-8535-4cf5-8e2b-88cc8510d889" type="APIKIT:NOT_ACCEPTABLE" >
-			<ee:transform doc:name="Transform Message" doc:id="96fc760b-86c2-4f5a-8b33-76101b1272b4" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Not acceptable"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[406]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="f73979e3-c442-4a1a-b284-d3efbec00dc8" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
-			<ee:transform doc:name="Transform Message" doc:id="e79c2fa8-2bc4-49a1-9a1f-a5c29b207be6" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Unsupported media type"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[415]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6686c353-733a-463b-8474-2e25d2dcac20" type="APIKIT:NOT_IMPLEMENTED" >
-			<ee:transform doc:name="Transform Message" doc:id="45b76b8c-1d9a-4c00-a631-d2b94043148e" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-{message: "Not Implemented"}]]></ee:set-payload>
-				</ee:message>
-				<ee:variables >
-					<ee:set-variable variableName="httpStatus" ><![CDATA[501]]></ee:set-variable>
-				</ee:variables>
-			</ee:transform>
-		</on-error-propagate>
-	</error-handler>
-	<error-handler name="flowErrorHandler" doc:id="da5556ac-3e6e-4e90-b800-7280c4d6d535" >
-		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c5c97178-6491-48a4-b773-de7fbded5a0a" type="WSC:SOAP_FAULT">
-			<ee:transform doc:name="Transform Message" doc:id="e9ad4315-fa25-4bfe-8ab7-774af84a90fe" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
+	<error-handler name="apiMainError_Handler" doc:id="e38e9416-1ed4-43eb-a3dc-f299e02a8545" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="fb6e7210-3950-40e2-b018-454b88d00b7e" type="SOAPKIT:UNAUTHORIZED">
+				<ee:transform doc:name="Transform Message" doc:id="08a17918-50a3-4a48-b3dd-83352ac2b8c6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 output application/xml
-ns ns0 http://karnel-sg.com/WS_M3_TO_CRM/KARNEL_MGMT_SYS
+---
+{
+	message: "You have no authorization to use this API"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+	</error-handler>
+	<error-handler name="FlowError_Handler" doc:id="21f38afb-bf33-4f08-8bc5-5bfbc9692daf" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="988eb818-8593-483c-bdc4-e1e4baacc1d1" type="SOAPKIT:FAULT">
+				<ee:transform doc:name="Transform Message" doc:id="8a5c6a25-78b5-40d6-be92-be2c2c5b2102" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
 ns soap http://schemas.xmlsoap.org/soap/envelope
 ---
 {
-  soap#Fault: {
-    faultcode: "soap:Server",
-    faultstring: "The error details",
-    detail: {
-      ns0#ShelfFault: {
-        errorStuff: 500
-      }
-    }
-  }
+    body: {
+        soap#Fault: {
+            faultcode: "soap:Server",
+            faultstring: "Operation [ListShelves:\soapkit-config] not implemented"
+        }
+    } write "application/xml"
 }]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-		</on-error-propagate>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
 	</error-handler>
 </mule>
