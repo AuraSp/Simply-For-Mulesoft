@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="GetAccountsToSpecificFiles" doc:id="01e7fcae-0894-4f57-8317-7fa6016d0853" >
+		<db:listener table="flights_customers" doc:name="GetAccountByCountry/Date" doc:id="4cd7a2e8-0095-41d3-af75-1d8e2a281a01" config-ref="DatabaseConfig" watermarkColumn="accountID">
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</db:listener>
+		<set-variable value='#[Mule::p("file.dir")++ dw::core::Strings::dasherize(payload.country as String) ++ "-" ++ payload.creationDate as String {format: "yyyyMMdd"} ++ ".csv"]' doc:name="file" doc:id="5a39781a-356e-47cd-9e68-e39d85729d89" variableName="file" />
+		<file:write doc:name="DBAccounts.csv" doc:id="a2ac5971-2300-41b5-bdf9-20f6dd8d1e30" path="#[vars.file]" mode="APPEND">
+			<file:content ><![CDATA[#[output application/csv header=false 
+---
+payload]]]></file:content>
+		</file:write>
+		<logger level="INFO" doc:name="CSV payload" doc:id="29212396-0fe7-45d8-b102-d58f1a86837b" message="#[output application/json --- vars.file]" />
+	</flow>
+</mule>
