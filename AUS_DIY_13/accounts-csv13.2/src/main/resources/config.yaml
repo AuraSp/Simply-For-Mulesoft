@@ -1,0 +1,13 @@
+http:
+  port: "8081"
+
+file:
+  dir:
+    existing: "/home/fluffy_unicorn/AnypointStudio/test-workspace/accountscsv/src/test/resources/output/"
+
+db:
+  host: "mudb.learn.mulesoft.com"
+  port: "3306"
+  user: "mule"
+  password: "mule"
+  database: "training"

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<sub-flow name="fileNameCreation" doc:id="731b851f-3400-4800-944f-71f28104141b" >
+		<foreach doc:name="For Each" doc:id="0fabfacd-8a2b-453f-848e-727eef7243a1" >
+			<set-variable value='#[Mule::p("file.dir.new")++ dw::core::Strings::dasherize(payload.country as String) ++ "-" ++ payload.creationDate as String {format: "yyyyMMdd"} ++ ".csv"]' doc:name="FileNameCreater" doc:id="6d40e93d-41c1-453b-97bf-6083c85ae7e0" variableName="CSVFileNew" />
+			<ee:transform doc:name="Transform Message" doc:id="26effc3a-9a3e-4c29-b5b8-1d29aa335303" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+vars.rootMessage.payload filter ($.country == payload)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<file:write doc:name="NewAccounts.csv" doc:id="39e2fd94-0b92-4fd4-9974-ac3dbe1d2748" path="#[vars.CSVFileNew]" mode="APPEND">
+			<file:content><![CDATA[#[output application/csv header=false --- payload]]]></file:content>
+		</file:write>
+		</foreach>
+	</sub-flow>
+	<flow name="syncDBWhileUsingManualWatermarking" doc:id="20d8b152-590c-4dcd-b9c6-ee83997e0752" >
+		<scheduler doc:name="Scheduler" doc:id="578a8ce3-9975-4d75-98d4-f51ec7d2360f" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve doc:name="Retrieve Stored Account ID's" doc:id="e93651fb-182e-4c1b-91d6-a57e51bdb3cd" key="lastAccountID">
+			<os:default-value ><![CDATA[0]]></os:default-value>
+		</os:retrieve>
+		<db:select doc:name="SelectNewRecordsOnly" doc:id="3f84e473-0704-4495-a5dc-ebc78ac6c72d" config-ref="DatabaseConfig">
+			<db:sql ><![CDATA[SELECT * FROM accounts
+WHERE accountID > :lastAccountID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{lastAccountID: vars.lastAccountID}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="44a7f06e-aad6-4c8c-9fe5-c48a350e7fc6">
+			<when expression="#[sizeOf(payload) &gt; 0]">
+				<os:store doc:name="lastAccountID" doc:id="32ec6c0a-bdc0-4c66-b317-23e934408ffa" key="lastAccountID">
+			<os:value><![CDATA[#[max(payload.*accountID)]]]></os:value>
+		</os:store>
+				<flow-ref doc:name="Flow Reference" doc:id="4fea02e7-2df2-40c7-b6b6-3ec41dbc07db" name="#[fileCreation]"/>
+				<logger level="INFO" doc:name="CSV payload" doc:id="5dbb55ae-3352-498b-960d-02d4766f6812" message="#[output application/json --- vars.file]" />
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="CSV payload" doc:id="cc6edf33-0939-4452-a376-d58b41ddb8c0" message='#[output application/json --- {message: "No new records"}]'/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="syncDBWhileUsingAutoWatermarking" doc:id="01e7fcae-0894-4f57-8317-7fa6016d0853" >
+		<db:listener table="flights_customers" doc:name="GetAccountByCountry/Date" doc:id="4cd7a2e8-0095-41d3-af75-1d8e2a281a01" config-ref="DatabaseConfig" watermarkColumn="accountID">
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</db:listener>
+		<set-variable value='#[Mule::p("file.dir.existing")++ dw::core::Strings::dasherize(payload.country as String) ++ "-" ++ payload.creationDate as String {format: "yyyyMMdd"} ++ ".csv"]' doc:name="FileNameCreater" doc:id="5a39781a-356e-47cd-9e68-e39d85729d89" variableName="CSVFile" />
+		<file:write doc:name="Accounts.csv" doc:id="a2ac5971-2300-41b5-bdf9-20f6dd8d1e30" path="#[vars.CSVFile]" mode="APPEND">
+			<file:content ><![CDATA[#[output application/csv header=false 
+---
+payload]]]></file:content>
+		</file:write>
+		<logger level="INFO" doc:name="CSV payload" doc:id="b2c1d069-b0d1-4671-af59-9c859ce4a962" message="#[output application/json --- {&#10;	filename: vars.CSVFile,&#10;	payload: payload&#10;}]"/>
+	</flow>
+	<flow name="monitorAccountTransactions" doc:id="f843f8cc-ab36-42a7-a223-ffe62bc0d60e" >
+		<file:listener doc:name="monitor accounts.csv" doc:id="973cbc41-80f0-4ef8-9bfa-535e6ee4e2b1" directory="${file.dir.existing}" autoDelete="true" outputMimeType="application/csv; header=false" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS" />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<ee:transform doc:name="Transform Message" doc:id="90b3a5a9-93d4-43b9-ae9b-e7e9288741ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java 
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="monitorAccountTransactions" doc:id="a9a18853-25dc-4508-adb5-8a275bbf6ea8" >
+			<batch:process-records >
+				<batch:step name="Transactions" doc:id="80eba838-c071-49b0-90d3-f5987b2ec6c6" >
+					<db:select doc:name="GetTransactionsByAccountID" doc:id="c8e2f5d6-25ad-42ed-8d90-defa00ace0a1" config-ref="DatabaseConfig" target="transactions" >
+						<db:sql ><![CDATA[SELECT * FROM flights_transactions WHERE customerRef=:accountID]]></db:sql>
+						<db:input-parameters ><![CDATA[#[{accountID: payload.column_0}]]]></db:input-parameters>
+					</db:select>
+				</batch:step>
+				<batch:step name="StoreTransactions" doc:id="6a3b46e6-dfa1-4388-b3a7-4ed3b67354b5" acceptExpression="#[ sizeOf(vars.transactions) &gt; 0 ]" >
+					<ee:transform doc:name="Transform Message" doc:id="a6e0f0ee-8dbe-4811-8b92-e257730b1f58" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	(payload),
+	transactions: vars.transactions
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="e9c039a1-0e96-450f-a0dd-a076a6b099fa" size="3" >
+						<logger level="INFO" doc:name="Store the Accounts With Transactions" doc:id="dbda0da4-914d-4866-8f88-30b4c0fdab6c" message="#[output application/json --- payload]" />
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="5bfb3ddc-3277-43c8-8ed5-8b7c1c0549a7" />
+			</batch:on-complete>
+		</batch:job>
+		<logger level="INFO" doc:name="Logger" doc:id="0ea7bcb1-01ff-4246-95ce-6b786d188346" message="#[output application/json --- payload]" />
+	</flow>
+</mule>
