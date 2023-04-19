@@ -18,7 +18,7 @@ output application/xml
 				</ee:transform>
 			</on-error-continue>
 	</error-handler>
-	<error-handler name="FlowError_Handler" doc:id="21f38afb-bf33-4f08-8bc5-5bfbc9692daf" >
+	<error-handler name="flowError_Handler" doc:id="21f38afb-bf33-4f08-8bc5-5bfbc9692daf" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="988eb818-8593-483c-bdc4-e1e4baacc1d1" type="SOAPKIT:FAULT">
 				<ee:transform doc:name="Transform Message" doc:id="8a5c6a25-78b5-40d6-be92-be2c2c5b2102" >
 					<ee:message >
