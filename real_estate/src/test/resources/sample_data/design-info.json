@@ -1,0 +1,23 @@
+{
+  "sampleData": {
+    "a64b1d29-7891-4ad9-aef2-d1069119d5e5": {
+      "payload": "sample_data/list_csv.csv"
+    },
+    "86f22517-4b21-4b4d-8266-fe34949e703d": {
+      "payload": "sample_data/defaultbinarytype.csv"
+    },
+    "0339d7f1-93e7-49f8-b489-fb677db17f3c": {},
+    "b9abb5fb-82cb-4210-8d6f-033b7b1ed7c8": {
+      "payload": "sample_data/defaultbinarytype_1.csv"
+    },
+    "63e0ec63-58a4-4f44-9589-d7c9c09eabfd": {
+      "payload": "sample_data/list_contact.dwl"
+    },
+    "88852749-af82-44b1-b3d5-7dd162243d6a": {
+      "payload": "sample_data/list_csv_1.csv"
+    },
+    "ab2354af-0aa4-4262-9ce1-3071ab0f4a4c": {
+      "payload": "sample_data/defaultbinarytype_2.csv"
+    }
+  }
+}

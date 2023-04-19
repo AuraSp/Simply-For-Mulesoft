@@ -1,0 +1,41 @@
+[
+  {
+    "CSV_ID": 1,
+    "sell": 271,
+    "list": 285,
+    "living": 30,
+    "rooms": 10,
+    "beds": 5,
+    "baths": 2,
+    "age": 30,
+    "acres": 0.53,
+    "taxes": 5702,
+    "createdAt": "2023-01-26T03:36:00Z"
+  },
+  {
+    "CSV_ID": 2,
+    "sell": 142,
+    "list": 160,
+    "living": 28,
+    "rooms": 10,
+    "beds": 5,
+    "baths": 3,
+    "age": 4,
+    "acres": 2.22,
+    "taxes": 3167,
+    "createdAt": "2023-01-26T03:36:00Z"
+  },
+  {
+    "CSV_ID": 3,
+    "sell": 89,
+    "list": 90,
+    "living": 13,
+    "rooms": 6,
+    "beds": 4,
+    "baths": 1,
+    "age": 202,
+    "acres": 1,
+    "taxes": 12192,
+    "createdAt": "2023-01-26T03:36:00Z"
+  }
+]

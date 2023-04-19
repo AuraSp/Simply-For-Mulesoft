@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/current/mule-quartz.xsd 
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="Lots-synch" doc:id="31d747f0-d1b5-4ec2-8370-50e002169667">
+		<scheduler doc:name="Scheduler" doc:id="689d0ce9-a84e-4c08-ac24-2b9803a9d9b8" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="15" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<file:read doc:name="Read" doc:id="07073a43-8ce9-4e21-a5bf-3c09050bf290" config-ref="File_Config" path="homes.csv" outputMimeType="application/csv; streaming=true" />
+		<ee:transform doc:name="Transform Message" doc:id="88852749-af82-44b1-b3d5-7dd162243d6a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(i)->{
+	CSV_ID__c: floor(randomInt(1000)),
+	Sell__c: i.Sell,
+	List__c: i.List,
+	Living__c: i.Living,
+	Rooms__c:i.Rooms,
+	Beds__c:i.Beds,
+	Baths__c:i.Baths,
+	Age__c:i.Age,
+	Acres__c:i.Acres,
+	Taxes__c:i.Taxes
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f8a24530-0a3a-49b8-9432-3da4b3204655" message="#[payload]" />
+		<salesforce:create-job-bulk-api-v2 objectType="Real_Estate__c" operation="insert" doc:name="Create job bulk api v 2 - Contact" doc:id="c5724b36-e4c9-4b28-b056-071c470446ff" config-ref="Salesforce_Config" externalIdFieldName="CSV_ID__c" lineEnding="CRLF"/>
+	</flow>
+</mule>

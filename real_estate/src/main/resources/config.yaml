@@ -1,0 +1,12 @@
+# Global
+http:
+  protocol: "HTTP"
+  port: "8081"
+  
+salesforce:
+  username: "ar@spej.com"
+  password: "mule-85rt-jj"
+  token: "YsJ4hwxQOkNpEdXRtdvK3Fj14"
+
+file:
+  directory: "/home/fluffy_unicorn/Downloads/csv"

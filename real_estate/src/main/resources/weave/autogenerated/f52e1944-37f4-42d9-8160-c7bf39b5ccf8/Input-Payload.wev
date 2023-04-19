@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_f52e1944_37f4_42d9_8160_c7bf39b5ccf8_Input_Payload = Array<{  createdAt?: String,   rooms?: Number,   baths?: Number,   living?: Number,   sell?: Number,   taxes?: Number,   acres?: Number,   list?: Number,   beds?: Number,   age?: Number,   _?: Any}>
+

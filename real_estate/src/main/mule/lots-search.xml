@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:spring="http://www.mulesoft.org/schema/mule/spring"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:real-estate="http://www.mulesoft.org/schema/mule/real-estate" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/real-estate http://www.mulesoft.org/schema/mule/real-estate/current/mule-real-estate.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<real-estate:config name="Real_Estate_Config" doc:name="Real Estate Config" doc:id="4cdafbcd-785d-467e-97b1-04aa31a20458" property_host="real-estate-api.us-e2.cloudhub.io" property_port="80" property_protocol="HTTP" />
+	<sub-flow name="Exit-logger" doc:id="f52e1944-37f4-42d9-8160-c7bf39b5ccf8" >
+		<logger level="INFO" doc:name="Logger" doc:id="fca64b54-d30f-42e8-aec0-9393c5655636" />
+	</sub-flow>
+	<sub-flow name="Query-variables" doc:id="bca8d4d6-18e2-45e0-8d18-3bd1397af20b" >
+		<set-variable value="#[attributes.queryParams.livingSurface]" doc:name="Living Surface" doc:id="f40912b7-2acc-472f-8a24-cc658b378e8d" variableName="livingSurface"/>
+		<set-variable value="#[attributes.queryParams.rooms]" doc:name="Rooms" doc:id="a14a372d-cc01-4d36-a6bc-51c49a432df7" variableName="rooms"/>
+		<set-variable value="#[attributes.queryParams.beds]" doc:name="Beds" doc:id="56b811a2-1818-4285-9178-094b630dc910" variableName="beds"/>
+		<set-variable value="#[attributes.uriParams.recordID]" doc:name="Record ID" doc:id="457ecb81-709e-46e9-be00-77c22035ab5b" variableName="recordID"/>
+	</sub-flow>
+	<flow name="Lots-search-by-filters" doc:id="fbd20658-8b72-4cea-ab6b-a931694d72a2">
+		<http:listener doc:name="Listener" doc:id="d37a5c69-62de-461e-83e2-a794810fb032" config-ref="HTTP_Listener_config" path="/lots" allowedMethods="GET"/>
+		<flow-ref doc:name="Variables" doc:id="7186ee59-7c23-46b2-80ce-a77584d9c989" name="Query-variables"/>
+		<choice doc:name="Choice" doc:id="5864db72-7a3d-4743-bad2-0bb0667a3487" >
+			<when expression="#[vars.livingSurface == null and vars.Rooms == null and vars.Beds == null]">
+				<real-estate:get-lots doc:name="Get all lots" doc:id="809fff9a-031f-4bc6-926d-5b268f187d96" config-ref="Real_Estate_Config" />
+			</when>
+			<when expression="#[vars.livingSurface != null and vars.rooms != null and vars.beds !=null]">
+				<real-estate:get-lots doc:name="Get lots by surface, room, bed count" doc:id="24a37377-11f3-4e58-92cf-5d201ab1f9e0" config-ref="Real_Estate_Config" >
+				</real-estate:get-lots>
+			</when>
+			<when expression="#[vars.livingSurface == null and vars.rooms == null]">
+				<real-estate:get-lots doc:name="Get lots by bed count" doc:id="0db15721-a029-4135-a83e-772012072c3f" config-ref="Real_Estate_Config" beds="#[vars.beds]" />
+			</when>
+			<when expression="#[vars.livingSurface == null and vars.beds == null]">
+				<real-estate:get-lots doc:name="Get lots by room count" doc:id="60c2fe11-6a48-42d7-8476-41f380c7bcf3" config-ref="Real_Estate_Config" rooms="#[vars.rooms]">
+				</real-estate:get-lots>
+			</when>
+			<otherwise>
+				<real-estate:get-lots doc:name="Get lots by living surface count" doc:id="c7fdea12-cc6e-43e7-9b2d-a2750fac5985" config-ref="Real_Estate_Config" living-surface="#[vars.livingSurface]"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="95de8dfd-0aa5-4a9a-8c5d-0ff1368a4bdf" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Logger" doc:id="70de9525-1784-47f7-a186-2031483ffa5d" name="Exit-logger"/>
+	</flow>
+	<flow name="Lots-search-by-id" doc:id="c95d0ae9-58e3-49ea-8f05-09420eae5fcb" >
+		<http:listener doc:name="Listener" doc:id="71d94089-22f6-4fc1-9835-1fc8850c1446" config-ref="HTTP_Listener_config" path="/lots/{recordID}" allowedMethods="GET" />
+		<flow-ref doc:name="Variables" doc:id="527eb977-8b34-405a-965f-6bd88e8de804" name="Query-variables" />
+		<real-estate:get-lot-by-record-id doc:name="Get lot by record id" doc:id="195bb4c0-7caf-4ffe-b662-11ed3b1ae375" config-ref="Real_Estate_Config" record-id="#[vars.recordID]">
+		</real-estate:get-lot-by-record-id>
+		<flow-ref doc:name="Logger" doc:id="1c751166-3ab9-4e03-bee2-6577ab57e948" name="Exit-logger"/>
+	</flow>
+</mule>
